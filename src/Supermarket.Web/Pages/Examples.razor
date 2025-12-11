@@ -1,0 +1,224 @@
+@page "/examples"
+
+<PageTitle>Examples</PageTitle>
+
+<div class="row mb-4">
+    <div class="col">
+        <h2>📚 Example Scenarios</h2>
+        <p class="lead">Common checkout scenarios demonstrating the pricing engine</p>
+    </div>
+</div>
+
+<div class="accordion" id="examplesAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#example1">
+                Example 1: Empty Basket
+            </button>
+        </h2>
+        <div id="example1" class="accordion-collapse collapse show" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> None</p>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£0.00</span></p>
+                <p><strong>Explanation:</strong> An empty basket has no cost.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example2">
+                Example 2: Single Items
+            </button>
+        </h2>
+        <div id="example2" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> A, B, C, D</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>A: £0.50</li>
+                    <li>B: £0.30</li>
+                    <li>C: £0.20</li>
+                    <li>D: £0.15</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£1.15</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example3">
+                Example 3: Special Offer on A (3 for £1.30)
+            </button>
+        </h2>
+        <div id="example3" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> A, A, A</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>Regular price: 3 × £0.50 = £1.50</li>
+                    <li>Special offer: 3 for £1.30 ✨</li>
+                    <li class="text-success">Savings: £0.20</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£1.30</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example4">
+                Example 4: Special Offer on B (2 for £0.45)
+            </button>
+        </h2>
+        <div id="example4" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> B, B</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>Regular price: 2 × £0.30 = £0.60</li>
+                    <li>Special offer: 2 for £0.45 ✨</li>
+                    <li class="text-success">Savings: £0.15</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£0.45</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example5">
+                Example 5: Partial Special Offer
+            </button>
+        </h2>
+        <div id="example5" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> A, A, A, A (4 A's and 1 B)</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>A: 3 for £1.30 (special) + 1 × £0.50 = £1.80</li>
+                    <li>B: 1 × £0.30 = £0.30</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£2.10</span></p>
+                <p><strong>Key Point:</strong> The special offer applies to the first 3 A's, and the 4th A is charged at unit price.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example6">
+                Example 6: Multiple Special Offers
+            </button>
+        </h2>
+        <div id="example6" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> A, A, A, B, B (3 A's and 2 B's)</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>A: 3 for £1.30 ✨</li>
+                    <li>B: 2 for £0.45 ✨</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£1.75</span></p>
+                <p><strong>Savings:</strong> <span class="text-success">£0.35 total</span> (£0.20 on A, £0.15 on B)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example7">
+                Example 7: Large Order
+            </button>
+        </h2>
+        <div id="example7" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> 6 A's, 4 B's, 3 C's, 2 D's</p>
+                <p><strong>Calculation:</strong></p>
+                <ul>
+                    <li>A: 2 sets of 3 = 2 × £1.30 = £2.60</li>
+                    <li>B: 2 sets of 2 = 2 × £0.45 = £0.90</li>
+                    <li>C: 3 × £0.20 = £0.60</li>
+                    <li>D: 2 × £0.15 = £0.30</li>
+                </ul>
+                <p><strong>Expected Total:</strong> <span class="text-success fw-bold">£4.40</span></p>
+                <p><strong>Savings:</strong> <span class="text-success">£0.70</span> (£0.40 on A, £0.30 on B)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example8">
+                Example 8: Mixed Items with Complex Calculation
+            </button>
+        </h2>
+        <div id="example8" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+            <div class="accordion-body">
+                <p><strong>Items:</strong> A, B, C, D, A, B, A (7 items total)</p>
+                <p><strong>Breakdown:</strong></p>
+                <ul>
+                    <li>3 A's → 1 special offer set = £1.30</li>
+                    <li>2 B's → 1 special offer set = £0.45</li>
+                    <li>1 C → regular price = £0.20</li>
+                    <li>1 D → regular price = £0.15</li>
+                </ul>
+                <p><strong>Calculation:</strong> £1.30 + £0.45 + £0.20 + £0.15 = <span class="text-success fw-bold">£2.10</span></p>
+                <p><strong>Note:</strong> Order doesn't matter - the system groups identical items automatically!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5 alert alert-info">
+    <h5>💡 Try It Yourself!</h5>
+    <p class="mb-0">
+        Head to the <a href="/" class="alert-link">Checkout page</a> to test these scenarios interactively.
+        All special offers apply automatically as you scan items!
+    </p>
+</div>
+
+<div class="mt-3 card">
+    <div class="card-body">
+        <h5 class="card-title">📊 Pricing Rules Summary</h5>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Unit Price</th>
+                        <th>Special Offer</th>
+                        <th>Savings per Offer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>A</strong></td>
+                        <td>£0.50</td>
+                        <td>3 for £1.30</td>
+                        <td class="text-success">£0.20</td>
+                    </tr>
+                    <tr>
+                        <td><strong>B</strong></td>
+                        <td>£0.30</td>
+                        <td>2 for £0.45</td>
+                        <td class="text-success">£0.15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>C</strong></td>
+                        <td>£0.20</td>
+                        <td class="text-muted">No offer</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D</strong></td>
+                        <td>£0.15</td>
+                        <td class="text-muted">No offer</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
