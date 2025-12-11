@@ -1,0 +1,251 @@
+@page "/"
+@inject HttpClient Http
+
+<PageTitle>Checkout</PageTitle>
+
+<div class="row">
+    <div class="col-lg-8 col-md-7 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">🛒 Interactive Checkout</h3>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(_cartId))
+                {
+                    <div class="mb-4">
+                        <h5>Scan Items</h5>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button class="btn btn-lg btn-outline-primary scan-button" @onclick='() => ScanItem("A")'>
+                                Scan A <small class="text-muted">(£0.50)</small>
+                            </button>
+                            <button class="btn btn-lg btn-outline-primary scan-button" @onclick='() => ScanItem("B")'>
+                                Scan B <small class="text-muted">(£0.30)</small>
+                            </button>
+                            <button class="btn btn-lg btn-outline-success scan-button" @onclick='() => ScanItem("C")'>
+                                Scan C <small class="text-muted">(£0.20)</small>
+                            </button>
+                            <button class="btn btn-lg btn-outline-success scan-button" @onclick='() => ScanItem("D")'>
+                                Scan D <small class="text-muted">(£0.15)</small>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Your Basket</h5>
+                        <div class="d-flex flex-wrap">
+                            @if (_items.Any())
+                            {
+                                @foreach (var item in _items.OrderBy(x => x.Key))
+                                {
+                                    <div class="cart-item">
+                                        @item.Key × @item.Value
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted fst-italic">No items scanned yet. Click the buttons above to add items!</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <span class="h4 me-2">Total:</span>
+                            <span class="total-display">£@((_total / 100.0).ToString("F2"))</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-warning" @onclick="ClearCart" disabled="@(!_items.Any())">
+                                Clear Basket
+                            </button>
+                            <button class="btn btn-danger" @onclick="StartNewCart">
+                                New Cart
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <h4>Welcome to Supermarket Checkout!</h4>
+                        <p class="text-muted">Start a new shopping cart to begin scanning items.</p>
+                        <button class="btn btn-success btn-lg" @onclick="StartNewCart">
+                            🛒 Start Shopping
+                        </button>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger mt-3 mb-0" role="alert">
+                        <strong>Error:</strong> @_error
+                    </div>
+                }
+
+                @if (_loading)
+                {
+                    <div class="text-center mt-3">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-5">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">💰 Special Offers</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Item A</strong>
+                            <br />
+                            <small class="text-muted">£0.50 each</small>
+                        </div>
+                        <span class="special-offer-badge">3 for £1.30</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Item B</strong>
+                            <br />
+                            <small class="text-muted">£0.30 each</small>
+                        </div>
+                        <span class="special-offer-badge">2 for £0.45</span>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <strong>Item C</strong>
+                            <br />
+                            <small class="text-muted">£0.20 each - No special offer</small>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div>
+                            <strong>Item D</strong>
+                            <br />
+                            <small class="text-muted">£0.15 each - No special offer</small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title">💡 Tip</h6>
+                <p class="card-text small text-muted">
+                    Special offers apply automatically! Try scanning 3 A's or 2 B's to see the discounted price.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? _cartId;
+    private int _total = 0;
+    private Dictionary<string, int> _items = new();
+    private string? _error;
+    private bool _loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await StartNewCart();
+    }
+
+    private async Task StartNewCart()
+    {
+        try
+        {
+            _loading = true;
+            _error = null;
+
+            var response = await Http.PostAsync("api/checkout/start", null);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<CheckoutResponse>();
+                _cartId = result?.CartId;
+                _total = 0;
+                _items.Clear();
+            }
+            else
+            {
+                _error = $"Failed to start cart: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to start cart: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ScanItem(string item)
+    {
+        try
+        {
+            _loading = true;
+            _error = null;
+
+            var response = await Http.PostAsync($"api/checkout/{_cartId}/scan/{item}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<ScanResponse>();
+                _total = result?.Total ?? 0;
+                _items = result?.Items ?? new();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                _error = $"Failed to scan item: {error}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ClearCart()
+    {
+        try
+        {
+            _loading = true;
+            _error = null;
+
+            var response = await Http.PostAsync($"api/checkout/{_cartId}/clear", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<TotalResponse>();
+                _total = result?.Total ?? 0;
+                _items = result?.Items ?? new();
+            }
+            else
+            {
+                _error = "Failed to clear cart";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to clear cart: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
