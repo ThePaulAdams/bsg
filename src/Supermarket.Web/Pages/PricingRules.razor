@@ -1,0 +1,294 @@
+@page "/pricing-rules"
+@inject HttpClient Http
+
+<PageTitle>Pricing Rules</PageTitle>
+
+<div class="row mb-4">
+    <div class="col">
+        <h2>💰 Pricing Rules Management</h2>
+        <p class="text-muted">View and edit pricing rules for checkout items</p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-success me-2" @onclick="ShowCreateModal">
+            ➕ Add New Rule
+        </button>
+        <button class="btn btn-warning" @onclick="ResetToDefaults">
+            🔄 Reset to Defaults
+        </button>
+    </div>
+</div>
+
+@if (_loading)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var rule in _rules)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card pricing-rule-card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Item @rule.ItemCode</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Unit Price:</strong>
+                            <span class="fs-5">£@((rule.UnitPrice / 100.0).ToString("F2"))</span>
+                        </div>
+
+                        @if (rule.SpecialOffer != null)
+                        {
+                            <div class="alert alert-success mb-3">
+                                <strong>✨ Special Offer:</strong><br />
+                                Buy @rule.SpecialOffer.Quantity for £@((rule.SpecialOffer.SpecialPrice / 100.0).ToString("F2"))
+                                <br />
+                                <small class="text-muted">
+                                    Save £@(((rule.SpecialOffer.Quantity * rule.UnitPrice - rule.SpecialOffer.SpecialPrice) / 100.0).ToString("F2"))
+                                </small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary mb-3">
+                                No special offer
+                            </div>
+                        }
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary flex-fill" @onclick='() => ShowEditModal(rule)'>
+                                📝 Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteRule(rule.ItemCode)'>
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!_rules.Any())
+    {
+        <div class="alert alert-info">
+            <h5>No pricing rules defined</h5>
+            <p>Click "Add New Rule" or "Reset to Defaults" to get started.</p>
+        </div>
+    }
+}
+
+@if (_showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(_isEditMode ? "Edit" : "Create") Pricing Rule</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Item Code</label>
+                        <input type="text" class="form-control" @bind="_editItemCode"
+                               disabled="@_isEditMode" maxlength="5" placeholder="e.g., A" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Unit Price (pence)</label>
+                        <input type="number" class="form-control" @bind="_editUnitPrice"
+                               min="0" placeholder="e.g., 50" />
+                        <small class="text-muted">Price in pence (£0.50 = 50)</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="_hasSpecialOffer" />
+                            <label class="form-check-label">Has Special Offer</label>
+                        </div>
+                    </div>
+
+                    @if (_hasSpecialOffer)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Special Offer Quantity</label>
+                            <input type="number" class="form-control" @bind="_editOfferQuantity"
+                                   min="1" placeholder="e.g., 3" />
+                            <small class="text-muted">How many items for the special price?</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Special Offer Price (pence)</label>
+                            <input type="number" class="form-control" @bind="_editOfferPrice"
+                                   min="0" placeholder="e.g., 130" />
+                            <small class="text-muted">Total price in pence for the offer quantity</small>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(_modalError))
+                    {
+                        <div class="alert alert-danger">@_modalError</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveRule">
+                        @(_isEditMode ? "Update" : "Create")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<PricingRuleDto> _rules = new();
+    private bool _loading = true;
+    private bool _showModal = false;
+    private bool _isEditMode = false;
+    private bool _hasSpecialOffer = false;
+
+    private string _editItemCode = "";
+    private int _editUnitPrice = 0;
+    private int _editOfferQuantity = 0;
+    private int _editOfferPrice = 0;
+    private string? _modalError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRules();
+    }
+
+    private async Task LoadRules()
+    {
+        _loading = true;
+        try
+        {
+            _rules = await Http.GetFromJsonAsync<List<PricingRuleDto>>("api/pricingrules") ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading rules: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void ShowCreateModal()
+    {
+        _isEditMode = false;
+        _editItemCode = "";
+        _editUnitPrice = 0;
+        _hasSpecialOffer = false;
+        _editOfferQuantity = 0;
+        _editOfferPrice = 0;
+        _modalError = null;
+        _showModal = true;
+    }
+
+    private void ShowEditModal(PricingRuleDto rule)
+    {
+        _isEditMode = true;
+        _editItemCode = rule.ItemCode;
+        _editUnitPrice = rule.UnitPrice;
+        _hasSpecialOffer = rule.SpecialOffer != null;
+        _editOfferQuantity = rule.SpecialOffer?.Quantity ?? 0;
+        _editOfferPrice = rule.SpecialOffer?.SpecialPrice ?? 0;
+        _modalError = null;
+        _showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        _showModal = false;
+        _modalError = null;
+    }
+
+    private async Task SaveRule()
+    {
+        try
+        {
+            _modalError = null;
+
+            SpecialOfferDto? specialOffer = _hasSpecialOffer
+                ? new SpecialOfferDto(_editOfferQuantity, _editOfferPrice)
+                : null;
+
+            if (_isEditMode)
+            {
+                var request = new UpdatePricingRuleRequest(_editUnitPrice, specialOffer);
+                var response = await Http.PutAsJsonAsync($"api/pricingrules/{_editItemCode}", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _modalError = await response.Content.ReadAsStringAsync();
+                    return;
+                }
+            }
+            else
+            {
+                var request = new CreatePricingRuleRequest(_editItemCode, _editUnitPrice, specialOffer);
+                var response = await Http.PostAsJsonAsync("api/pricingrules", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _modalError = await response.Content.ReadAsStringAsync();
+                    return;
+                }
+            }
+
+            CloseModal();
+            await LoadRules();
+        }
+        catch (Exception ex)
+        {
+            _modalError = ex.Message;
+        }
+    }
+
+    private async Task DeleteRule(string itemCode)
+    {
+        if (!await ConfirmDelete(itemCode)) return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/pricingrules/{itemCode}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadRules();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting rule: {ex.Message}");
+        }
+    }
+
+    private Task<bool> ConfirmDelete(string itemCode)
+    {
+        // In a real app, use a proper confirmation modal
+        // For now, assume user confirms
+        return Task.FromResult(true);
+    }
+
+    private async Task ResetToDefaults()
+    {
+        try
+        {
+            var response = await Http.PostAsync("api/pricingrules/reset", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadRules();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error resetting rules: {ex.Message}");
+        }
+    }
+}
