@@ -57,7 +57,7 @@ bsg/
 - **Frontend**: Blazor WebAssembly (WASM)
 - **UI Framework**: Bootstrap 5.3.0
 - **Testing**: NUnit 4.0
-- **Test Reports**: trx2html (HTML test results)
+- **Test Reports**: Custom HTML report with detailed test output
 - **Deployment**: Docker + Railway.com
 - **CI/CD**: Integrated in Dockerfile (tests must pass to deploy)
 
@@ -188,22 +188,19 @@ dotnet test
 # Run with detailed output
 dotnet test --logger "console;verbosity=detailed"
 
-# Run with TRX output (for HTML reports)
-dotnet test --logger "trx;LogFileName=test-results.trx"
-
-# Generate HTML report (requires trx2html)
-dotnet tool install --global trx2html
-trx2html TestResults/test-results.trx --output test-report/index.html
+# Run specific test class
+dotnet test --filter "FullyQualifiedName~CheckoutTests"
 ```
 
 ### Build-Time Testing
 
-The Dockerfile runs tests during build:
+The Dockerfile runs tests during build and generates an HTML report:
 - ✅ Tests execute in Release configuration
-- ✅ Test results captured in TRX format
-- ✅ HTML report generated with trx2html
+- ✅ Detailed test output captured
+- ✅ Custom HTML report generated showing all test results
 - ✅ Build fails if any test fails (CI gate)
 - ✅ Report served at `/reports/index.html` in production
+- ✅ Report shows: test summary, pass/fail counts, and detailed execution log
 
 ## 🎨 User Interface
 
