@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/TestResults
+**/*.md
+**/node_modules
+**/.env
+**/.env.*
+**/secrets.json
