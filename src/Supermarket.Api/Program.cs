@@ -9,6 +9,7 @@ builder.Services.AddSwaggerGen();
 
 // Register custom services
 builder.Services.AddSingleton<ICartService, InMemoryCartService>();
+builder.Services.AddSingleton<IPricingRuleService, InMemoryPricingRuleService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
