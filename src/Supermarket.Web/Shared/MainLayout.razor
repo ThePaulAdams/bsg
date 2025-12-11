@@ -1,0 +1,46 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">🛒 Supermarket Checkout</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                            Checkout
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/pricing-rules">
+                            Pricing Rules
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/examples">
+                            Examples
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports/index.html" target="_blank">
+                            Test Reports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        @Body
+    </main>
+
+    <footer class="mt-5 py-3 bg-light text-center">
+        <div class="container">
+            <p class="text-muted mb-0">Supermarket Checkout Challenge - .NET 8 + Blazor WASM + Bootstrap 5</p>
+        </div>
+    </footer>
+</div>
