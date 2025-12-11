@@ -57,7 +57,7 @@ bsg/
 - **Frontend**: Blazor WebAssembly (WASM)
 - **UI Framework**: Bootstrap 5.3.0
 - **Testing**: NUnit 4.0
-- **Test Reports**: LiquidTestReports (HTML test results)
+- **Test Reports**: trx2html (HTML test results)
 - **Deployment**: Docker + Railway.com
 - **CI/CD**: Integrated in Dockerfile (tests must pass to deploy)
 
@@ -191,9 +191,9 @@ dotnet test --logger "console;verbosity=detailed"
 # Run with TRX output (for HTML reports)
 dotnet test --logger "trx;LogFileName=test-results.trx"
 
-# Generate HTML report (requires LiquidTestReports)
-dotnet tool install --global dotnet-liquidtestReports.cli
-liquid --inputs TestResults/*.trx --output-directory ./test-report
+# Generate HTML report (requires trx2html)
+dotnet tool install --global trx2html
+trx2html TestResults/test-results.trx --output test-report/index.html
 ```
 
 ### Build-Time Testing
@@ -201,7 +201,7 @@ liquid --inputs TestResults/*.trx --output-directory ./test-report
 The Dockerfile runs tests during build:
 - ✅ Tests execute in Release configuration
 - ✅ Test results captured in TRX format
-- ✅ HTML report generated with LiquidTestReports
+- ✅ HTML report generated with trx2html
 - ✅ Build fails if any test fails (CI gate)
 - ✅ Report served at `/reports/index.html` in production
 

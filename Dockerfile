@@ -2,8 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Install HTML test report logger
-RUN dotnet tool install --global dotnet-liquidtestReports.cli --version 1.0.9
+# Install TRX to HTML converter
+RUN dotnet tool install --global trx2html --version 1.4.1
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 # Copy solution and project files (for layer caching optimization)
@@ -31,11 +31,7 @@ RUN dotnet test \
 
 # Generate HTML Test Results Report
 WORKDIR /src
-RUN liquid \
-    --inputs "tests/Supermarket.Tests/TestResults/*.trx" \
-    --output-directory "TestReport" \
-    --title "Supermarket Checkout - Test Results" \
-    --report-title "Test Execution Report"
+RUN trx2html tests/Supermarket.Tests/TestResults/test-results.trx --output TestReport/index.html
 
 # Build and Publish the API (includes Blazor WASM assets)
 WORKDIR /src/src/Supermarket.Api
