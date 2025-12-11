@@ -2,8 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Install ReportGenerator globally for test coverage HTML reports
-RUN dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.1.10
+# Install HTML test report logger
+RUN dotnet tool install --global dotnet-liquidtestReports.cli --version 1.0.9
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 # Copy solution and project files (for layer caching optimization)
@@ -19,22 +19,23 @@ RUN dotnet restore "Supermarket.sln"
 # Copy all source code
 COPY . .
 
-# Run Tests with Code Coverage
+# Run Tests with TRX logger
 # If tests fail, Docker build fails (CI gate)
 WORKDIR /src/tests/Supermarket.Tests
 RUN dotnet test \
     --configuration Release \
     --no-restore \
-    --collect:"XPlat Code Coverage" \
     --results-directory ./TestResults \
+    --logger "trx;LogFileName=test-results.trx" \
     --logger "console;verbosity=detailed"
 
-# Generate HTML Coverage Report
+# Generate HTML Test Results Report
 WORKDIR /src
-RUN reportgenerator \
-    -reports:"tests/Supermarket.Tests/TestResults/**/coverage.cobertura.xml" \
-    -targetdir:"TestReport" \
-    -reporttypes:"Html;Badges"
+RUN liquid \
+    --inputs "tests/Supermarket.Tests/TestResults/*.trx" \
+    --output-directory "TestReport" \
+    --title "Supermarket Checkout - Test Results" \
+    --report-title "Test Execution Report"
 
 # Build and Publish the API (includes Blazor WASM assets)
 WORKDIR /src/src/Supermarket.Api

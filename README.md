@@ -9,7 +9,7 @@ A full-stack .NET 8 solution demonstrating a flexible supermarket pricing engine
 - **Checkout UI**: Main page - Interactive shopping cart
 - **Pricing Rules**: `/pricing-rules` - Manage pricing rules dynamically
 - **Examples**: `/examples` - 8 detailed scenario examples
-- **Test Reports**: `/reports/index.html` - Coverage report (generated during build)
+- **Test Reports**: `/reports/index.html` - Test execution results (generated during build)
 - **API Documentation**: Swagger UI available in development mode
 
 ## 🏗 Architecture
@@ -56,8 +56,8 @@ bsg/
 - **Backend**: ASP.NET Core Web API 8.0
 - **Frontend**: Blazor WebAssembly (WASM)
 - **UI Framework**: Bootstrap 5.3.0
-- **Testing**: NUnit 4.0 + Coverlet
-- **Code Coverage**: ReportGenerator 5.1.10
+- **Testing**: NUnit 4.0
+- **Test Reports**: LiquidTestReports (HTML test results)
 - **Deployment**: Docker + Railway.com
 - **CI/CD**: Integrated in Dockerfile (tests must pass to deploy)
 
@@ -73,8 +73,8 @@ bsg/
 ### Extended Features (Beyond Specification)
 - ✅ **Dynamic Pricing Rules Management**: Full CRUD operations via GUI
 - ✅ **Interactive Web Interface**: Modern Bootstrap 5 design
-- ✅ **Comprehensive Test Suite**: 76 tests with >90% coverage
-- ✅ **Live Test Reports**: Viewable in production at `/reports/index.html`
+- ✅ **Comprehensive Test Suite**: 76 tests covering all functionality
+- ✅ **Live Test Results**: Viewable in production at `/reports/index.html`
 - ✅ **API Documentation**: Swagger/OpenAPI in development
 - ✅ **Example Scenarios**: 8 detailed examples with calculations
 
@@ -144,16 +144,16 @@ http://localhost:5000  # or https://localhost:5001
 
 ## ✅ Testing Strategy
 
-### Test Coverage
+### Test Suite
 
-- **Total Tests**: 76
-- **Core Domain**: 47 tests (>95% coverage)
-  - CheckoutTests: 27 tests
-  - PricingRuleTests: 18 tests
-  - SpecialOfferTests: 7 tests
-- **API Controllers**: 29 tests (>90% coverage)
-  - CheckoutControllerTests: 11 tests
-  - PricingRulesControllerTests: 18 tests
+- **Total Tests**: 76 comprehensive tests
+- **Core Domain Tests**: 47 tests
+  - CheckoutTests: 27 tests - Cart operations and calculations
+  - PricingRuleTests: 18 tests - Pricing logic and special offers
+  - SpecialOfferTests: 7 tests - Offer validation
+- **API Controller Tests**: 29 tests
+  - CheckoutControllerTests: 11 tests - Cart API endpoints
+  - PricingRulesControllerTests: 18 tests - CRUD operations
 
 ### Key Test Scenarios
 
@@ -185,23 +185,23 @@ http://localhost:5000  # or https://localhost:5001
 # Run all tests
 dotnet test
 
-# Run with coverage
-dotnet test --collect:"XPlat Code Coverage"
+# Run with detailed output
+dotnet test --logger "console;verbosity=detailed"
 
-# Generate HTML report
-dotnet tool install --global dotnet-reportgenerator-globaltool
-reportgenerator -reports:**/coverage.cobertura.xml -targetdir:./coverage-report
+# Run with TRX output (for HTML reports)
+dotnet test --logger "trx;LogFileName=test-results.trx"
 
-# View report
-# Open coverage-report/index.html in browser
+# Generate HTML report (requires LiquidTestReports)
+dotnet tool install --global dotnet-liquidtestReports.cli
+liquid --inputs TestResults/*.trx --output-directory ./test-report
 ```
 
 ### Build-Time Testing
 
 The Dockerfile runs tests during build:
 - ✅ Tests execute in Release configuration
-- ✅ Code coverage collected via Coverlet
-- ✅ HTML report generated with ReportGenerator
+- ✅ Test results captured in TRX format
+- ✅ HTML report generated with LiquidTestReports
 - ✅ Build fails if any test fails (CI gate)
 - ✅ Report served at `/reports/index.html` in production
 
@@ -235,9 +235,10 @@ The Dockerfile runs tests during build:
 
 4. **Test Reports (`/reports/index.html`)**
    - Auto-generated during Docker build
-   - Coverage statistics
-   - Visual badges
-   - Proves all tests passed
+   - Shows all 76 test results
+   - Pass/fail status for each test
+   - Test execution times and details
+   - Proves all tests passed before deployment
 
 ## 🚢 Deployment to Railway
 
@@ -295,9 +296,9 @@ No additional configuration required!
 
 ### Testing Approach
 - **Build-time execution** (not runtime)
-- HTML reports served statically
-- Acts as CI/CD gate
-- Visible proof of quality
+- HTML test results reports served statically
+- Acts as CI/CD gate (build fails if tests fail)
+- Visible proof of quality with detailed test outcomes
 
 ### Frontend Architecture
 - **Blazor WASM** for full C# stack
