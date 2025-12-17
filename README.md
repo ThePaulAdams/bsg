@@ -1,3 +1,9 @@
+Workflow
+Largely leveraging Claude, in as close to a single shot prompt with well defined requirements and testing. 
+Chose to host in railway and build a webgui for visualisation and manual testing. 
+Obviously in this case have not followed any kind of branching strategy.
+Code manually reviewed in a staged creation and commits with a claude planned development. 
+
 # Supermarket Checkout Challenge
 
 A full-stack .NET 8 solution demonstrating a flexible supermarket pricing engine with automatic special offer application.
