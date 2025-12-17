@@ -4,6 +4,8 @@ Chose to host in railway and build a webgui for visualisation and manual testing
 Obviously in this case have not followed any kind of branching strategy.
 Code manually reviewed in a staged creation and commits with a claude planned development. 
 
+Can be accessed online through https://bsg-production.up.railway.app/
+
 # Supermarket Checkout Challenge
 
 A full-stack .NET 8 solution demonstrating a flexible supermarket pricing engine with automatic special offer application.
